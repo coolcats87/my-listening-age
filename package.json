@@ -18,7 +18,4 @@
     "url": "https://github.com/coolcats87/my-listening-age/issues"
   },
   "homepage": "https://github.com/coolcats87/my-listening-age#readme",
-  "dependencies": {
-    "node-fetch": "^2.7.0"
-  }
 }

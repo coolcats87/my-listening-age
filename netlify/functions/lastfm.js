@@ -1,7 +1,6 @@
 // Save as: netlify/functions/lastfm.js (for Netlify)
 // Or: api/lastfm.js (for Vercel)
 
-const fetch = require('node-fetch');
 
 // Replace with your Last.fm API key
 const API_KEY = 'b9b3e198db6c5a9285130b255fdd5aaa';
