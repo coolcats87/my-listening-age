@@ -152,4 +152,47 @@
                 <div class="decade-bar">
                     <div class="decade-name">${decade}s</div>
                     <div class="bar-container">
-                        <div class="bar-fill"
+                        <div class="bar-fill" style="width:${pct}%"></div>
+                    </div>
+                    <div style="width:50px;text-align:right">${d.count} ${crown}</div>
+                </div>`;
+        });
+
+        resultsDiv.innerHTML = `
+            <div class="listening-age">
+                <div>Your Listening Age</div>
+                <div class="age-number">${a.listeningAge}</div>
+                <div>You listen like someone from ${a.dominantDecade}!</div>
+            </div>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-label">Dominant Decade</div>
+                    <div class="stat-value">${a.dominantDecade}s</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Albums Analyzed</div>
+                    <div class="stat-value">${a.totalAlbums}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Average Release Year</div>
+                    <div class="stat-value">${a.averageYear}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Decade Distribution</div>
+                    ${bars}
+                </div>
+            </div>
+        `;
+        resultsDiv.style.display = 'block';
+    }
+
+    function showError(msg) {
+        const e = document.getElementById('error');
+        e.textContent = msg;
+        e.style.display = 'block';
+    }
+
+    document.getElementById('username').addEventListener('keypress', e => {
+        if (e.key === 'Enter') calculateListeningAge();
+    });
+</script>
