@@ -1,59 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listening Age Calculator</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            text-align: center;
+            margin-top: 20px;
+            color: #667eea;
+        }
+
+        .progress {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .results {
+            margin-top: 30px;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .listening-age {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .age-number {
+            font-size: 4em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .stats {
+            display: grid;
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            color: #333;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .decade-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .decade-name {
+            width: 80px;
+            font-weight: 500;
+        }
+
+        .bar-container {
+            flex: 1;
+            height: 24px;
+            background: #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 0 10px;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s ease;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎵 Listening Age Calculator</h1>
+        <p class="subtitle">Discover your musical era based on your Last.fm listening history</p>
+
+        <div class="input-group">
+            <label for="username">Last.fm Username</label>
+            <input type="text" id="username" placeholder="Enter your Last.fm username">
+        </div>
+
+        <button id="calculate" onclick="calculateListeningAge()">Calculate My Listening Age</button>
+
+        <div id="loading" class="loading" style="display: none;">
+            <p>Analyzing your music taste...</p>
+            <div class="progress" id="progress"></div>
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+        <div id="results" class="results" style="display: none;"></div>
+    </div>
+
 <script>
-    const USE_BACKEND = true;
     const API_ENDPOINT = '/.netlify/functions/lastfm';
 
-    // Generic function to talk to backend
     async function fetchLastFM(params) {
         const query = new URLSearchParams(params).toString();
         const res = await fetch(`${API_ENDPOINT}?${query}`);
         return await res.json();
     }
 
-    async function calculateListeningAge() {
-        const username = document.getElementById('username').value.trim();
-        if (!username) {
-            showError('Please enter your Last.fm username');
-            return;
-        }
-
-        document.getElementById('calculate').disabled = true;
-        document.getElementById('loading').style.display = 'block';
-        document.getElementById('error').style.display = 'none';
-        document.getElementById('results').style.display = 'none';
-        document.getElementById('progress').textContent = '';
-
-        try {
-            updateProgress('Fetching your top albums...');
-            const topAlbums = await fetchTopAlbums(username);
-
-            if (!topAlbums || topAlbums.length === 0) {
-                throw new Error('No albums found. Check your username.');
-            }
-
-            updateProgress(`Found ${topAlbums.length} albums! Getting release dates...`);
-            const albumsWithDates = await fetchAlbumDates(topAlbums, username);
-
-            if (albumsWithDates.length === 0) {
-                throw new Error('Not enough release date info.');
-            }
-
-            updateProgress('Calculating...');
-            const analysis = analyzeListeningAge(albumsWithDates);
-            displayResults(analysis);
-
-        } catch (error) {
-            showError(error.message);
-        } finally {
-            document.getElementById('calculate').disabled = false;
-            document.getElementById('loading').style.display = 'none';
-        }
-    }
-
-    function updateProgress(msg) {
-        document.getElementById('progress').textContent = msg;
-    }
-
-    // NEW fetchTopAlbums using backend
     async function fetchTopAlbums(username) {
         const data = await fetchLastFM({
             method: "user.gettopalbums",
@@ -66,7 +229,6 @@
         return data.topalbums?.album || [];
     }
 
-    // NEW fetchAlbumDates using backend
     async function fetchAlbumDates(albums, username) {
         const out = [];
         const max = Math.min(albums.length, 40);
@@ -83,7 +245,6 @@
             });
 
             let year = null;
-
             if (data.album?.wiki?.published) {
                 year = new Date(data.album.wiki.published).getFullYear();
             }
@@ -97,13 +258,44 @@
                 });
             }
 
-            await new Promise(res => setTimeout(res, 150));
+            await new Promise(res => setTimeout(res, 120));
         }
 
         return out;
     }
 
-    // Analyze + Display remain unchanged
+    async function calculateListeningAge() {
+        const username = document.getElementById('username').value.trim();
+
+        if (!username) {
+            showError('Please enter your Last.fm username');
+            return;
+        }
+
+        document.getElementById('calculate').disabled = true;
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('error').style.display = 'none';
+        document.getElementById('results').style.display = 'none';
+        document.getElementById('progress').textContent = '';
+
+        try {
+            updateProgress('Fetching your top albums...');
+            const topAlbums = await fetchTopAlbums(username);
+
+            updateProgress(`Found ${topAlbums.length} albums. Fetching release dates...`);
+            const albumDates = await fetchAlbumDates(topAlbums, username);
+
+            const analysis = analyzeListeningAge(albumDates);
+            displayResults(analysis);
+
+        } catch (err) {
+            showError(err.message);
+        } finally {
+            document.getElementById('calculate').disabled = false;
+            document.getElementById('loading').style.display = 'none';
+        }
+    }
+
     function analyzeListeningAge(albums) {
         const decadeCounts = {};
         const currentYear = new Date().getFullYear();
@@ -115,7 +307,8 @@
             decadeCounts[decade].playcount += a.playcount;
         });
 
-        let bestDecade = null, bestScore = 0;
+        let bestDecade = null;
+        let bestScore = 0;
 
         for (const [decade, d] of Object.entries(decadeCounts)) {
             const score = d.count * Math.log(d.playcount + 1);
@@ -132,7 +325,9 @@
             dominantDecade: bestDecade,
             totalAlbums: albums.length,
             decadeDistribution: decadeCounts,
-            averageYear: Math.round(albums.reduce((s, a) => s + a.year, 0) / albums.length)
+            averageYear: Math.round(
+                albums.reduce((s, a) => s + a.year, 0) / albums.length
+            )
         };
     }
 
@@ -164,25 +359,30 @@
                 <div class="age-number">${a.listeningAge}</div>
                 <div>You listen like someone from ${a.dominantDecade}!</div>
             </div>
+
             <div class="stats">
                 <div class="stat-card">
                     <div class="stat-label">Dominant Decade</div>
                     <div class="stat-value">${a.dominantDecade}s</div>
                 </div>
+
                 <div class="stat-card">
                     <div class="stat-label">Albums Analyzed</div>
                     <div class="stat-value">${a.totalAlbums}</div>
                 </div>
+
                 <div class="stat-card">
                     <div class="stat-label">Average Release Year</div>
                     <div class="stat-value">${a.averageYear}</div>
                 </div>
+
                 <div class="stat-card">
                     <div class="stat-label">Decade Distribution</div>
                     ${bars}
                 </div>
             </div>
         `;
+
         resultsDiv.style.display = 'block';
     }
 
@@ -196,3 +396,6 @@
         if (e.key === 'Enter') calculateListeningAge();
     });
 </script>
+
+</body>
+</html>
