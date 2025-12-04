@@ -4,7 +4,7 @@
 const fetch = require('node-fetch');
 
 // Replace with your Last.fm API key
-const API_KEY = 'YOUR_LASTFM_API_KEY';
+const API_KEY = 'b9b3e198db6c5a9285130b255fdd5aaa';
 const API_BASE = 'https://ws.audioscrobbler.com/2.0/';
 
 exports.handler = async (event, context) => {

@@ -226,7 +226,7 @@
         // const API_ENDPOINT = '/api/lastfm'; // For Vercel
 
         // OPTION 2: Use CORS proxy (less reliable)
-        const USE_BACKEND = false; // Set to true if using your own backend
+        const USE_BACKEND = true; // Set to true if using your own backend
         const API_ENDPOINT = USE_BACKEND ? '/.netlify/functions/lastfm' : null;
 
         async function fetchLastFM(params) {
